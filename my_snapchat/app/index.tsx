@@ -1,8 +1,13 @@
 import { Text, View } from "react-native";
+import { ThemedText } from '@/components/ThemedText';
+import { ThemedView } from '@/components/ThemedView';
 export default function Index() {
   return (
     <View>
-    <Text>bonjour</Text>
+    <ThemedView>
+      <ThemedText type="subtitle">jojo</ThemedText>
+      </ThemedView>
+    
     </View>
   );
 }
