@@ -4,7 +4,7 @@
     "slug": "my_snapchat",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/logo.png",
+    "icon": "./assets/images/logos.png",
     "scheme": "mysnapchat",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
