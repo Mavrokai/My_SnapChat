@@ -1,7 +1,7 @@
 import { Stack } from "expo-router";
 import React from "react";
 import { ImageBackground, Text, TouchableOpacity, View } from "react-native";
-import { styles } from "./index.styles";
+import styles from "./index.styles";
 
 export default function Index() {
   return (
