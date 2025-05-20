@@ -2,16 +2,14 @@ import React, { useState } from "react";
 import { View, Text, TextInput, Button, StyleSheet, Alert } from "react-native";
 
 
-const API_URL = "https://snapchat.epihub.eu/user";
-const API_KEY = process.env.EXPO_PUBLIC_API_KEY_BRYAN;
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
+const API_KEY = process.env.EXPO_PUBLIC_API_KEY;
 export default function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
 
   const handleRegister = async () => {
-    console.log("Clé API chargée:", process.env.EXPO_PUBLIC_API_KEY_BRYAN);
-
     try {
       const response = await fetch(API_URL, {
         method: "POST",
