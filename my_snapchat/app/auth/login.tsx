@@ -14,7 +14,7 @@ export default function Login(){
   const handleLogin = async () => {
     setError("");
     try {
-      const response = await fetch(apiUrl, {
+      const response = await fetch(apiUrl || "", {
         method: "PUT",
         headers: {
           "x-api-key": apiKey || "",
@@ -27,7 +27,7 @@ export default function Login(){
       }
       const data = await response.json();
       console.log(data);
-      router.push("/auth/home");
+      router.push("./auth/home");
     } catch (error: any) {
       setError(error.message);
     }
