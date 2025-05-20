@@ -47,9 +47,9 @@ export default function Register() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Inscription</Text>
+      <TextInput placeholder="Username" style={styles.input} onChangeText={setUsername} />
       <TextInput placeholder="Email" style={styles.input} onChangeText={setEmail} />
       <TextInput placeholder="Mot de passe" style={styles.input} secureTextEntry onChangeText={setPassword} />
-      <TextInput placeholder="Username" style={styles.input} onChangeText={setUsername} />
       <Button title="S'inscrire" onPress={handleRegister} />
     </View>
   );
