@@ -1,6 +1,7 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as ImageManipulator from "expo-image-manipulator";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -16,6 +17,25 @@ import { SafeAreaView } from "react-native-safe-area-context";
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 const API_KEY = process.env.EXPO_PUBLIC_API_KEY;
 const API_URL_SNAP = process.env.EXPO_PUBLIC_API_URLSNAP;
+
+const decodeJWT = (token: string) => {
+  try {
+    const base64Url = token.split(".")[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map(function (c) {
+          return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+        })
+        .join("")
+    );
+    return JSON.parse(jsonPayload);
+  } catch (error) {
+    console.error("Erreur lors du décodage du JWT:", error);
+    return null;
+  }
+};
 
 interface Contact {
   _id: string;
@@ -41,68 +61,20 @@ export default function SelectRecipient() {
     { label: "1min", value: 60 },
   ];
 
-  const authenticate = async () => {
+  const getStoredToken = async () => {
     try {
-      console.log("Tentative d'authentification...");
-      console.log("URL:", `${API_URL}`);
-      console.log("Headers:", {
-        "x-api-key": API_KEY ? "présent" : "manquant",
-        "Content-Type": "application/json",
-      });
-
-      const response = await fetch(`${API_URL}`, {
-        method: "PUT",
-        headers: {
-          "x-api-key": API_KEY || "",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: "bryan2@gmail.com",
-          password: "bryan",
-        }),
-      });
-
-      console.log("Status de la réponse:", response.status);
-      const responseText = await response.text();
-      console.log("Réponse brute:", responseText);
-
-      if (!response.ok) {
-        throw new Error(
-          `Erreur d'authentification: ${response.status} ${responseText}`
-        );
+      const token = await AsyncStorage.getItem("userToken");
+      if (!token) {
+        throw new Error("Non authentifié");
       }
-
-      const data = JSON.parse(responseText);
-      console.log("Token reçu:", data.data.token ? "présent" : "manquant");
-      return data.data.token;
+      return token;
     } catch (err) {
-      console.error("Erreur détaillée:", err);
-      throw err;
+      throw new Error("Erreur lors de la récupération du token");
     }
   };
 
-  const authenticateAndFetchContacts = useCallback(async () => {
-    try {
-      const token = await authenticate();
-      setBearerToken(token);
-      await fetchContacts(token);
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Erreur d'authentification"
-      );
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    authenticateAndFetchContacts();
-  }, [authenticateAndFetchContacts]);
-
   const fetchContacts = async (token: string) => {
     try {
-      console.log("Tentative de récupération des contacts...");
-      console.log("Token:", token ? "présent" : "manquant");
-
       const response = await fetch(`${API_URL}`, {
         method: "GET",
         headers: {
@@ -112,28 +84,37 @@ export default function SelectRecipient() {
         },
       });
 
-      console.log("Status de la réponse contacts:", response.status);
-      const responseText = await response.text();
-      console.log("Réponse brute contacts:", responseText);
-
       if (!response.ok) {
-        throw new Error(
-          `Erreur lors de la récupération des contacts: ${response.status} ${responseText}`
-        );
+        throw new Error("Erreur lors de la récupération des contacts");
       }
 
-      const data = JSON.parse(responseText);
-      console.log("Données reçues:", data);
+      const data = await response.json();
       const contactsList = data.data || [];
       setContacts(contactsList);
       setFilteredContacts(contactsList);
     } catch (err) {
-      console.error("Erreur détaillée contacts:", err);
       setError(err instanceof Error ? err.message : "Une erreur est survenue");
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const initializeData = async () => {
+      try {
+        const token = await getStoredToken();
+        setBearerToken(token);
+        await fetchContacts(token);
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Erreur d'authentification"
+        );
+        setLoading(false);
+      }
+    };
+
+    initializeData();
+  }, []);
 
   const handleSearch = (text: string) => {
     setSearchQuery(text);
@@ -151,6 +132,16 @@ export default function SelectRecipient() {
 
     try {
       setLoading(true);
+
+      // Décoder et afficher les informations de l'utilisateur
+      const decodedToken = decodeJWT(bearerToken);
+      if (decodedToken) {
+        console.log("Email de l'expéditeur:", decodedToken.email);
+        console.log(
+          "Username de l'expéditeur:",
+          decodedToken.username || "Non disponible"
+        );
+      }
 
       const manipResult = await ImageManipulator.manipulateAsync(
         imageUri as string,

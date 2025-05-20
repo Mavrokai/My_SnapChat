@@ -1,10 +1,11 @@
-import { Stack , useRouter , router} from "expo-router";
+import { useRouter } from "expo-router";
 import React from "react";
 import { ImageBackground, Text, TouchableOpacity, View } from "react-native";
-import styles  from "./index.styles";
-const router=useRouter();
+import styles from "./index.styles";
 
 export default function Index() {
+  const router = useRouter();
+
   return (
     <>
       <ImageBackground
@@ -20,7 +21,11 @@ export default function Index() {
           >
             <Text style={styles.buttonText}>Se connecter</Text>
           </TouchableOpacity>
-          <TouchableOpacity testID="register" style={styles.register} onPress={() => router.push("/auth/register")}>
+          <TouchableOpacity
+            testID="register"
+            style={styles.register}
+            onPress={() => router.push("/auth/register")}
+          >
             <Text style={styles.buttonText}>S&apos;inscrire</Text>
           </TouchableOpacity>
         </View>

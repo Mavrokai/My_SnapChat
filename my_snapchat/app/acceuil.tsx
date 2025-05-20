@@ -1,8 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { CameraType, CameraView, useCameraPermissions } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Image,
   Pressable,
@@ -20,6 +21,16 @@ export default function App() {
   const cameraRef = useRef<CameraView>(null);
   const [mode] = useState<"picture" | "video">("picture");
   const [recording, setRecording] = useState(false);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = await AsyncStorage.getItem("userToken");
+      if (!token) {
+        router.replace("/auth/login");
+      }
+    };
+    checkAuth();
+  }, []);
 
   if (!permission || !permission.granted) {
     return (

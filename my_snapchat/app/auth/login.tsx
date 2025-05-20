@@ -1,16 +1,17 @@
-import React,{ useState } from "react";
-import {View,TextInput,Button,Text,StyleSheet } from "react-native";
-import {useRouter} from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
+import React, { useState } from "react";
+import { Button, Text, TextInput, View } from "react-native";
+
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 const apiKey = process.env.EXPO_PUBLIC_API_KEY;
 
-export default function Login(){
+export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
-  console.log(apiUrl);
-  console.log(apiKey);
+
   const handleLogin = async () => {
     setError("");
     try {
@@ -26,12 +27,18 @@ export default function Login(){
         throw new Error("Identifiants invalides");
       }
       const data = await response.json();
-      console.log(data);
-      router.push("/auth/home");
+
+      // Stocker les informations de l'utilisateur
+      await AsyncStorage.setItem("userToken", data.data.token);
+      await AsyncStorage.setItem("userEmail", email);
+      await AsyncStorage.setItem("userData", JSON.stringify(data.data));
+
+      router.push("../acceuil");
     } catch (error: any) {
       setError(error.message);
     }
   };
+
   return (
     <View
       style={{
