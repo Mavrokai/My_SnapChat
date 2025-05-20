@@ -1,0 +1,86 @@
+import { Dimensions, Platform, StyleSheet } from "react-native";
+
+const { width, height } = Dimensions.get("window");
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#000",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  message: {
+    textAlign: "center",
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "500",
+    paddingBottom: 20,
+  },
+  camera: {
+    flex: 1,
+    width: width,
+    height: height,
+    borderRadius: 0,
+    overflow: "hidden",
+  },
+  topButtonsContainer: {
+    position: "absolute",
+    top: Platform.OS === "ios" ? 60 : 40,
+    left: 0,
+    width: width,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 32,
+    zIndex: 10,
+  },
+  bottomButtonsContainer: {
+    position: "absolute",
+    bottom: Platform.OS === "ios" ? 60 : 40,
+    left: 0,
+    width: width,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 32,
+    zIndex: 10,
+  },
+  button: {
+    backgroundColor: "#FD3E83",
+    borderRadius: 20,
+    padding: 10,
+    marginHorizontal: 4,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  shutterBtn: {
+    backgroundColor: "transparent",
+    borderWidth: 5,
+    borderColor: "#fff",
+    right: 35,
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    alignItems: "center",
+    justifyContent: "center",
+    marginHorizontal: 50,
+    shadowColor: "#fff",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.5,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  shutterBtnInner: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    backgroundColor: "#fff",
+  },
+});
+
+export default styles;
