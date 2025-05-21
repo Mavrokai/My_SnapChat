@@ -102,13 +102,11 @@ export default function Login() {
         return;
       }
 
-      // Si on a un token et "Se souvenir de moi" est activé, on redirige
       if (userToken && rememberMeValue === "true") {
         router.replace("../acceuil");
         return;
       }
 
-      // Si on a des identifiants sauvegardés et "Se souvenir de moi" est activé
       const savedEmail = await AsyncStorage.getItem("savedEmail");
       const savedPassword = await AsyncStorage.getItem("savedPassword");
 
