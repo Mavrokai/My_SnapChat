@@ -4,11 +4,11 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Animated,
-  Button,
   Easing,
   Switch,
   Text,
   TextInput,
+  TouchableOpacity,
   View,
 } from "react-native";
 import styles from "./login.styles";
@@ -118,7 +118,7 @@ export default function Login() {
       }
     } catch (error) {
       console.error(
-        "Erreur lors de la vérification de la connexion automatique:",
+        "Erreur lors de la vÃ©rification de la connexion automatique:",
         error
       );
     } finally {
@@ -152,6 +152,7 @@ export default function Login() {
         onChangeText={setEmail}
         autoCapitalize="none"
         style={styles.input}
+        placeholderTextColor="rgba(255,255,255,0.5)"
       />
       <TextInput
         placeholder="Mot de passe"
@@ -159,22 +160,21 @@ export default function Login() {
         onChangeText={setPassword}
         secureTextEntry
         style={styles.input}
+        placeholderTextColor="rgba(255,255,255,0.5)"
       />
       <View style={styles.rememberMeContainer}>
         <Switch
           value={rememberMe}
           onValueChange={setRememberMe}
-          trackColor={{ false: "#767577", true: "#81b0ff" }}
-          thumbColor={rememberMe ? "#2196F3" : "#f4f3f4"}
+          trackColor={{ false: "#767577", true: "#FD3E83" }}
+          thumbColor={rememberMe ? "#fff" : "#f4f3f4"}
         />
         <Text style={styles.rememberMeText}>Se souvenir de moi</Text>
       </View>
       <View style={styles.buttonContainer}>
-        <Button
-          title="Se connecter"
-          onPress={() => handleLogin()}
-          color="#2196F3"
-        />
+        <TouchableOpacity style={styles.button} onPress={() => handleLogin()}>
+          <Text style={styles.buttonText}>Se connecter</Text>
+        </TouchableOpacity>
       </View>
       {error ? <Text style={styles.errorText}>{error}</Text> : null}
     </View>

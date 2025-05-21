@@ -5,25 +5,24 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     padding: 25,
-    backgroundColor: "#fff",
+    backgroundColor: "#000",
   },
   title: {
     fontSize: 32,
     fontWeight: "bold",
     marginBottom: 32,
     textAlign: "center",
-    color: "#333",
+    color: "#fff",
     textTransform: "uppercase",
     letterSpacing: 1,
   },
   input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
+    backgroundColor: "rgba(255,255,255,0.1)",
     borderRadius: 12,
     padding: 15,
     marginBottom: 20,
     fontSize: 16,
-    backgroundColor: "#f9f9f9",
+    color: "#fff",
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -62,14 +61,14 @@ const styles = StyleSheet.create({
   rememberMeText: {
     marginLeft: 12,
     fontSize: 16,
-    color: "#333",
+    color: "#fff",
     fontWeight: "500",
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#fff",
+    backgroundColor: "#000",
   },
   loadingSpinner: {
     width: 80,
@@ -83,6 +82,26 @@ const styles = StyleSheet.create({
     color: "#FD3E83",
     fontWeight: "600",
     letterSpacing: 1,
+  },
+  button: {
+    backgroundColor: "#FD3E83",
+    padding: 15,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
   },
 });
 
