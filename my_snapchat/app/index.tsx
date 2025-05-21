@@ -1,23 +1,40 @@
-import { useRouter } from "expo-router";
-import React from "react";
-import { ImageBackground, Text, TouchableOpacity, View , Alert} from "react-native";
-import styles from "./index.styles";
+import { Audio } from "expo-av";
 import { Camera } from "expo-camera";
 import * as MediaLibrary from "expo-media-library";
+import { useRouter } from "expo-router";
+import React from "react";
+import {
+  Alert,
+  ImageBackground,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import styles from "./index.styles";
+
 export default function Index() {
   const router = useRouter();
-//Pour permettre la permission
-const handleRegister=async()=>{
-  const { status : cameraStatus } = await Camera.requestCameraPermissionsAsync();
-  const { status: mediaStatus } = await MediaLibrary.requestPermissionsAsync();
-  if(cameraStatus !== "granted" && mediaStatus !== "granted"){
-    Alert.alert("Permission à la caméra et la gallerie requise!");
-  }
-  else{
-    router.push("/auth/register");
-  }
 
-}
+  const handleRegister = async () => {
+    const { status: cameraStatus } =
+      await Camera.requestCameraPermissionsAsync();
+    const { status: mediaStatus } =
+      await MediaLibrary.requestPermissionsAsync();
+    const { status: audioStatus } = await Audio.requestPermissionsAsync();
+
+    if (
+      cameraStatus !== "granted" ||
+      mediaStatus !== "granted" ||
+      audioStatus !== "granted"
+    ) {
+      Alert.alert(
+        "Permission requise",
+        "L'application a besoin d'accéder à la caméra, au microphone et à la galerie pour fonctionner correctement."
+      );
+    } else {
+      router.push("/auth/register");
+    }
+  };
 
   return (
     <>
