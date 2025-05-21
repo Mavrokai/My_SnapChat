@@ -65,6 +65,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#000",
+  },
+  loadingText: {
+    marginTop: 20,
+    fontSize: 18,
+    color: "#FD3E83",
+    fontWeight: "600",
+    letterSpacing: 1,
+  },
 });
 
 export default styles;

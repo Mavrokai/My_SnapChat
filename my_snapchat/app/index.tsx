@@ -14,6 +14,42 @@ import styles from "./index.styles";
 
 export default function Index() {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = await AsyncStorage.getItem("userToken");
+      if (token) {
+        router.replace("/acceuil");
+        return;
+      }
+      setIsLoading(false);
+    };
+    checkAuth();
+  }, [router]);
+
+  if (isLoading) {
+    return (
+      <View
+        style={[
+          styles.background,
+          { justifyContent: "center", alignItems: "center" },
+        ]}
+      >
+        <ActivityIndicator size="large" color="#FD3E83" />
+        <Text
+          style={{
+            color: "#FD3E83",
+            marginTop: 20,
+            fontSize: 18,
+            fontWeight: "600",
+          }}
+        >
+          Chargement...
+        </Text>
+      </View>
+    );
+  }
 
   const handleRegister = async () => {
     const { status: cameraStatus } =
