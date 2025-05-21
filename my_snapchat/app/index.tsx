@@ -1,8 +1,10 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Audio } from "expo-av";
+import { Camera } from "expo-camera";
+import * as MediaLibrary from "expo-media-library";
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
-  ActivityIndicator,
+  Alert,
   ImageBackground,
   Text,
   TouchableOpacity,
@@ -49,6 +51,27 @@ export default function Index() {
     );
   }
 
+  const handleRegister = async () => {
+    const { status: cameraStatus } =
+      await Camera.requestCameraPermissionsAsync();
+    const { status: mediaStatus } =
+      await MediaLibrary.requestPermissionsAsync();
+    const { status: audioStatus } = await Audio.requestPermissionsAsync();
+
+    if (
+      cameraStatus !== "granted" ||
+      mediaStatus !== "granted" ||
+      audioStatus !== "granted"
+    ) {
+      Alert.alert(
+        "Permission requise",
+        "L'application a besoin d'accéder à la caméra, au microphone et à la galerie pour fonctionner correctement."
+      );
+    } else {
+      router.push("/auth/register");
+    }
+  };
+
   return (
     <>
       <ImageBackground
@@ -67,7 +90,7 @@ export default function Index() {
           <TouchableOpacity
             testID="register"
             style={styles.register}
-            onPress={() => router.push("/auth/register")}
+            onPress={handleRegister}
           >
             <Text style={styles.buttonText}>S&apos;inscrire</Text>
           </TouchableOpacity>
