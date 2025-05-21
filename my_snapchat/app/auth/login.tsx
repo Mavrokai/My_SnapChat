@@ -62,6 +62,7 @@ export default function Login() {
 
         await AsyncStorage.setItem("userToken", data.data.token);
         await AsyncStorage.setItem("userEmail", emailToUse);
+        await AsyncStorage.setItem("userUsername", data.data.username || "");
         await AsyncStorage.setItem("userData", JSON.stringify(data.data));
 
         if (rememberMe) {
@@ -84,15 +85,32 @@ export default function Login() {
 
   const checkAutoLogin = useCallback(async () => {
     try {
-      const savedEmail = await AsyncStorage.getItem("savedEmail");
-      const savedPassword = await AsyncStorage.getItem("savedPassword");
-      const rememberMeValue = await AsyncStorage.getItem("rememberMe");
       const userToken = await AsyncStorage.getItem("userToken");
+      const rememberMeValue = await AsyncStorage.getItem("rememberMe");
 
-      if (userToken) {
+      if (userToken && rememberMeValue !== "true") {
+        await AsyncStorage.multiRemove([
+          "userToken",
+          "userEmail",
+          "userUsername",
+          "userData",
+          "savedEmail",
+          "savedPassword",
+          "rememberMe",
+        ]);
+        setIsLoading(false);
+        return;
+      }
+
+      // Si on a un token et "Se souvenir de moi" est activé, on redirige
+      if (userToken && rememberMeValue === "true") {
         router.replace("../acceuil");
         return;
       }
+
+      // Si on a des identifiants sauvegardés et "Se souvenir de moi" est activé
+      const savedEmail = await AsyncStorage.getItem("savedEmail");
+      const savedPassword = await AsyncStorage.getItem("savedPassword");
 
       if (rememberMeValue === "true" && savedEmail && savedPassword) {
         setEmail(savedEmail);

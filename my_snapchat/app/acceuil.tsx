@@ -19,8 +19,7 @@ export default function App() {
   const [facing, setFacing] = useState<CameraType>("back");
   const [permission] = useCameraPermissions();
   const cameraRef = useRef<CameraView>(null);
-  const [mode] = useState<"picture" | "video">("picture");
-  const [recording, setRecording] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -51,19 +50,6 @@ export default function App() {
     }
   };
 
-  const recordVideo = async () => {
-    if (recording) {
-      setRecording(false);
-      cameraRef.current?.stopRecording();
-      return;
-    }
-    setRecording(true);
-    if (cameraRef.current && "recordAsync" in cameraRef.current) {
-      const video = await cameraRef.current.recordAsync();
-      console.log({ video });
-    }
-  };
-
   function toggleCameraFacing() {
     setFacing((current) => (current === "back" ? "front" : "back"));
   }
@@ -82,12 +68,32 @@ export default function App() {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.multiRemove([
+        "userToken",
+        "userEmail",
+        "userUsername",
+        "userData",
+        "savedEmail",
+        "savedPassword",
+        "rememberMe",
+      ]);
+      router.replace("/auth/login");
+    } catch (error) {
+      console.error("Erreur lors de la déconnexion:", error);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <CameraView style={styles.camera} facing={facing} ref={cameraRef} />
 
       <View style={styles.topButtonsContainer}>
-        <TouchableOpacity style={styles.button} onPress={openGallery}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => setShowMenu(!showMenu)}
+        >
           <Image
             source={require("../assets/images/userProfil.png")}
             style={{ width: 40, height: 40 }}
@@ -101,11 +107,19 @@ export default function App() {
         </TouchableOpacity>
       </View>
 
+      {showMenu && (
+        <View style={styles.menuContainer}>
+          <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
+            <Text style={styles.menuText}>Déconnexion</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
       <View style={styles.bottomButtonsContainer}>
         <TouchableOpacity style={styles.button} onPress={openGallery}>
           <Ionicons name="images" size={40} color="white" />
         </TouchableOpacity>
-        <Pressable onPress={mode === "picture" ? takePicture : recordVideo}>
+        <Pressable onPress={takePicture}>
           {({ pressed }) => (
             <View
               style={[
@@ -119,7 +133,7 @@ export default function App() {
                 style={[
                   styles.shutterBtnInner,
                   {
-                    backgroundColor: mode === "picture" ? "white" : "red",
+                    backgroundColor: "white",
                   },
                 ]}
               />

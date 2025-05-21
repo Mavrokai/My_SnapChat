@@ -81,6 +81,32 @@ const styles = StyleSheet.create({
     borderRadius: 35,
     backgroundColor: "#fff",
   },
+  menuContainer: {
+    position: "absolute",
+    top: Platform.OS === "ios" ? 110 : 90,
+    left: 32,
+    backgroundColor: "rgba(0, 0, 0, 0.9)",
+    borderRadius: 10,
+    padding: 10,
+    zIndex: 100,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  menuItem: {
+    padding: 10,
+    minWidth: 120,
+  },
+  menuText: {
+    color: "#FD3E83",
+    fontSize: 16,
+    fontWeight: "500",
+  },
 });
 
 export default styles;

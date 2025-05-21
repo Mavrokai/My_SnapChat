@@ -135,11 +135,9 @@ export default function SelectRecipient() {
 
       const decodedToken = decodeJWT(bearerToken);
       if (decodedToken) {
+        const username = await AsyncStorage.getItem("userUsername");
         console.log("Email de l'expéditeur:", decodedToken.email);
-        console.log(
-          "Username de l'expéditeur:",
-          decodedToken.username || "Non disponible"
-        );
+        console.log("Username de l'expéditeur:", username || "Non disponible");
       }
 
       const manipResult = await ImageManipulator.manipulateAsync(
