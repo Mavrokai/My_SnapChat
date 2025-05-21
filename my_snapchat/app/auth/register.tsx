@@ -1,9 +1,11 @@
 import { router } from "expo-router";
 import React, { useState } from "react";
-import { Alert, Button, StyleSheet, Text, TextInput, View } from "react-native";
+import { Alert, Text, TextInput, TouchableOpacity, View } from "react-native";
+import styles from "./register.styles";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 const API_KEY = process.env.EXPO_PUBLIC_API_KEY;
+
 export default function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -47,37 +49,27 @@ export default function Register() {
         placeholder="Username"
         style={styles.input}
         onChangeText={setUsername}
+        placeholderTextColor="rgba(255,255,255,0.5)"
       />
       <TextInput
         placeholder="Email"
         style={styles.input}
         onChangeText={setEmail}
+        autoCapitalize="none"
+        placeholderTextColor="rgba(255,255,255,0.5)"
       />
       <TextInput
         placeholder="Mot de passe"
         style={styles.input}
         secureTextEntry
         onChangeText={setPassword}
+        placeholderTextColor="rgba(255,255,255,0.5)"
       />
-      <Button title="S'inscrire" onPress={handleRegister} />
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity style={styles.button} onPress={handleRegister}>
+          <Text style={styles.buttonText}>S&apos;inscrire</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#fff",
-  },
-  title: { fontSize: 24, fontWeight: "bold", marginBottom: 20 },
-  input: {
-    width: "80%",
-    padding: 10,
-    marginBottom: 15,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
-  },
-});
