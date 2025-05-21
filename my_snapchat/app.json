@@ -9,7 +9,11 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "Cette application a besoin d'accéder à la caméra.",
+        "NSPhotoLibraryUsageDescription": "Cette application a besoin d'accéder à votre galerie pour sélectionner des photos."
+      }
     },
     "android": {
       "adaptiveIcon": {

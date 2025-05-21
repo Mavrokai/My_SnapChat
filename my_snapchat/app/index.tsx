@@ -3,13 +3,15 @@ import React from "react";
 import { ImageBackground, Text, TouchableOpacity, View , Alert} from "react-native";
 import styles from "./index.styles";
 import { Camera } from "expo-camera";
+import * as MediaLibrary from "expo-media-library";
 export default function Index() {
   const router = useRouter();
 //Pour permettre la permission
 const handleRegister=async()=>{
-  const { status } = await Camera.requestCameraPermissionsAsync();
-  if(status !== "granted"){
-    Alert.alert("Permission à la caméra requise!");
+  const { status : cameraStatus } = await Camera.requestCameraPermissionsAsync();
+  const { status: mediaStatus } = await MediaLibrary.requestPermissionsAsync();
+  if(cameraStatus !== "granted" && mediaStatus !== "granted"){
+    Alert.alert("Permission à la caméra et la gallerie requise!");
   }
   else{
     router.push("/auth/register");
