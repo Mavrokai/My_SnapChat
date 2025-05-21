@@ -103,9 +103,16 @@ const styles = StyleSheet.create({
     minWidth: 120,
   },
   menuText: {
-    color: "#FD3E83",
+    color: "white",
     fontSize: 16,
-    fontWeight: "500",
+  },
+  zoomContainer: {
+    position: "absolute",
+    bottom: 150,
+    alignSelf: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+    padding: 10,
+    borderRadius: 20,
   },
 });
 

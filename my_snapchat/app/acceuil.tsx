@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Slider from "@react-native-community/slider";
 import { CameraType, CameraView, useCameraPermissions } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
@@ -21,6 +22,8 @@ export default function App() {
   const [permission] = useCameraPermissions();
   const cameraRef = useRef<CameraView>(null);
   const [showMenu, setShowMenu] = useState(false);
+  const [zoom, setZoom] = useState(0);
+  const [flash, setFlash] = useState<"off" | "on">("off");
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -112,7 +115,13 @@ export default function App() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <CameraView style={styles.camera} facing={facing} ref={cameraRef} />
+      <CameraView
+        style={styles.camera}
+        facing={facing}
+        ref={cameraRef}
+        zoom={zoom}
+        flash={flash}
+      />
 
       <View style={styles.topButtonsContainer}>
         <TouchableOpacity
@@ -130,15 +139,43 @@ export default function App() {
             style={{ width: 40, height: 40 }}
           />
         </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => setFlash(flash === "off" ? "on" : "off")}
+        >
+          <Ionicons
+            name={flash === "off" ? "flash-off" : "flash"}
+            size={40}
+            color="white"
+          />
+        </TouchableOpacity>
       </View>
 
       {showMenu && (
         <View style={styles.menuContainer}>
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => router.push("/profile")}
+          >
+            <Text style={styles.menuText}>Profil</Text>
+          </TouchableOpacity>
           <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
             <Text style={styles.menuText}>Déconnexion</Text>
           </TouchableOpacity>
         </View>
       )}
+
+      <View style={styles.zoomContainer}>
+        <Slider
+          style={{ width: 200, height: 40 }}
+          minimumValue={0}
+          maximumValue={1}
+          value={zoom}
+          onValueChange={setZoom}
+          minimumTrackTintColor="#FFFFFF"
+          maximumTrackTintColor="#000000"
+        />
+      </View>
 
       <View style={styles.bottomButtonsContainer}>
         <TouchableOpacity style={styles.button} onPress={openGallery}>
