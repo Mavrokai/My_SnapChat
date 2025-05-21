@@ -1,9 +1,10 @@
-import { Audio } from "expo-av";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Camera } from "expo-camera";
 import * as MediaLibrary from "expo-media-library";
 import { useRouter } from "expo-router";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   ImageBackground,
   Text,
@@ -18,12 +19,20 @@ export default function Index() {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const token = await AsyncStorage.getItem("userToken");
-      if (token) {
-        router.replace("/acceuil");
-        return;
+      try {
+        const token = await AsyncStorage.getItem("userToken");
+        if (token) {
+          router.replace("/acceuil");
+          return;
+        }
+      } catch (error) {
+        console.error(
+          "Erreur lors de la vérification de l'authentification:",
+          error
+        );
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
     checkAuth();
   }, [router]);
@@ -56,16 +65,11 @@ export default function Index() {
       await Camera.requestCameraPermissionsAsync();
     const { status: mediaStatus } =
       await MediaLibrary.requestPermissionsAsync();
-    const { status: audioStatus } = await Audio.requestPermissionsAsync();
 
-    if (
-      cameraStatus !== "granted" ||
-      mediaStatus !== "granted" ||
-      audioStatus !== "granted"
-    ) {
+    if (cameraStatus !== "granted" || mediaStatus !== "granted") {
       Alert.alert(
         "Permission requise",
-        "L'application a besoin d'accéder à la caméra, au microphone et à la galerie pour fonctionner correctement."
+        "L'application a besoin d'accéder à la caméra et à la galerie pour fonctionner correctement."
       );
     } else {
       router.push("/auth/register");

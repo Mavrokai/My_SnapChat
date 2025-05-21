@@ -202,47 +202,8 @@ export default function SelectRecipient() {
       const responseData = JSON.parse(responseText);
       if (responseData && responseData.success === true) {
         console.log("Snap envoyé avec succès!");
-
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        const snapResponse = await fetch(`${API_URL_SNAP}`, {
-          method: "GET",
-          headers: {
-            "x-api-key": API_KEY || "",
-            Authorization: `Bearer ${bearerToken}`,
-            "Content-Type": "application/json",
-          },
-        });
-
-        const snapData = await snapResponse.json();
-        console.log("Données des snaps:", JSON.stringify(snapData, null, 2));
-
-        if (snapData && snapData.data && snapData.data.length > 0) {
-          const lastSnap = snapData.data[0];
-          console.log("ID du dernier snap:", lastSnap._id);
-          console.log("Détails du dernier snap:", lastSnap);
-
-          const snapDetailsResponse = await fetch(
-            `${API_URL_SNAP}/${lastSnap._id}`,
-            {
-              method: "GET",
-              headers: {
-                "x-api-key": API_KEY || "",
-                Authorization: `Bearer ${bearerToken}`,
-                "Content-Type": "application/json",
-              },
-            }
-          );
-
-          const snapDetails = await snapDetailsResponse.json();
-          console.log(
-            "Détails complets du snap:",
-            JSON.stringify(snapDetails, null, 2)
-          );
-        }
-
         setError(null);
-        setTimeout(() => router.back(), 2000);
+        router.replace("/acceuil");
       } else {
         throw new Error("Réponse invalide du serveur");
       }

@@ -5,6 +5,7 @@ import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
+  AppState,
   Image,
   Pressable,
   SafeAreaView,
@@ -29,6 +30,30 @@ export default function App() {
       }
     };
     checkAuth();
+  }, [router]);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener(
+      "change",
+      async (nextAppState) => {
+        if (nextAppState === "background" || nextAppState === "inactive") {
+          const rememberMe = await AsyncStorage.getItem("rememberMe");
+          if (rememberMe !== "true") {
+            await AsyncStorage.multiRemove([
+              "userToken",
+              "userEmail",
+              "userUsername",
+              "userData",
+            ]);
+            router.replace("/auth/login");
+          }
+        }
+      }
+    );
+
+    return () => {
+      subscription.remove();
+    };
   }, [router]);
 
   if (!permission || !permission.granted) {

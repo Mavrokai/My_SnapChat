@@ -22,12 +22,20 @@ export default function Register() {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const token = await AsyncStorage.getItem("userToken");
-      if (token) {
-        router.replace("../acceuil");
-        return;
+      try {
+        const token = await AsyncStorage.getItem("userToken");
+        if (token) {
+          router.replace("/acceuil");
+          return;
+        }
+      } catch (error) {
+        console.error(
+          "Erreur lors de la vérification de l'authentification:",
+          error
+        );
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
     checkAuth();
   }, []);

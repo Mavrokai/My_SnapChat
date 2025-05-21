@@ -27,12 +27,29 @@ export default function Login() {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const token = await AsyncStorage.getItem("userToken");
-      if (token) {
-        router.replace("../acceuil");
-        return;
+      try {
+        const token = await AsyncStorage.getItem("userToken");
+        const rememberMeValue = await AsyncStorage.getItem("rememberMe");
+
+        if (token && rememberMeValue === "true") {
+          router.replace("/acceuil");
+          return;
+        } else if (token) {
+          await AsyncStorage.multiRemove([
+            "userToken",
+            "userEmail",
+            "userUsername",
+            "userData",
+          ]);
+        }
+      } catch (error) {
+        console.error(
+          "Erreur lors de la vérification de l'authentification:",
+          error
+        );
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
     checkAuth();
   }, [router]);
@@ -82,12 +99,14 @@ export default function Login() {
           await AsyncStorage.setItem("savedPassword", passwordToUse);
           await AsyncStorage.setItem("rememberMe", "true");
         } else {
-          await AsyncStorage.removeItem("savedEmail");
-          await AsyncStorage.removeItem("savedPassword");
-          await AsyncStorage.removeItem("rememberMe");
+          await AsyncStorage.multiRemove([
+            "savedEmail",
+            "savedPassword",
+            "rememberMe",
+          ]);
         }
 
-        router.replace("../acceuil");
+        router.replace("/acceuil");
       } catch (error: any) {
         setError(error.message);
       }
@@ -97,28 +116,7 @@ export default function Login() {
 
   const checkAutoLogin = useCallback(async () => {
     try {
-      const userToken = await AsyncStorage.getItem("userToken");
       const rememberMeValue = await AsyncStorage.getItem("rememberMe");
-
-      if (userToken && rememberMeValue !== "true") {
-        await AsyncStorage.multiRemove([
-          "userToken",
-          "userEmail",
-          "userUsername",
-          "userData",
-          "savedEmail",
-          "savedPassword",
-          "rememberMe",
-        ]);
-        setIsLoading(false);
-        return;
-      }
-
-      if (userToken && rememberMeValue === "true") {
-        router.replace("../acceuil");
-        return;
-      }
-
       const savedEmail = await AsyncStorage.getItem("savedEmail");
       const savedPassword = await AsyncStorage.getItem("savedPassword");
 
@@ -130,13 +128,13 @@ export default function Login() {
       }
     } catch (error) {
       console.error(
-        "Erreur lors de la vÃ©rification de la connexion automatique:",
+        "Erreur lors de la vérification de la connexion automatique:",
         error
       );
     } finally {
       setIsLoading(false);
     }
-  }, [handleLogin, router]);
+  }, [handleLogin]);
 
   useEffect(() => {
     checkAutoLogin();
