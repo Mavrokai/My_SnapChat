@@ -1,10 +1,21 @@
 import { useRouter } from "expo-router";
 import React from "react";
-import { ImageBackground, Text, TouchableOpacity, View } from "react-native";
+import { ImageBackground, Text, TouchableOpacity, View , Alert} from "react-native";
 import styles from "./index.styles";
-
+import { Camera } from "expo-camera";
 export default function Index() {
   const router = useRouter();
+//Pour permettre la permission
+const handleRegister=async()=>{
+  const { status } = await Camera.requestCameraPermissionsAsync();
+  if(status !== "granted"){
+    Alert.alert("Permission à la caméra requise!");
+  }
+  else{
+    router.push("/auth/register");
+  }
+
+}
 
   return (
     <>
@@ -24,7 +35,7 @@ export default function Index() {
           <TouchableOpacity
             testID="register"
             style={styles.register}
-            onPress={() => router.push("/auth/register")}
+            onPress={handleRegister}
           >
             <Text style={styles.buttonText}>S&apos;inscrire</Text>
           </TouchableOpacity>
