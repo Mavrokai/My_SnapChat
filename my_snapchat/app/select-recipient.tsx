@@ -68,7 +68,7 @@ export default function SelectRecipient() {
         throw new Error("Non authentifié");
       }
       return token;
-    } catch (err) {
+    } catch {
       throw new Error("Erreur lors de la récupération du token");
     }
   };
@@ -133,7 +133,6 @@ export default function SelectRecipient() {
     try {
       setLoading(true);
 
-      // Décoder et afficher les informations de l'utilisateur
       const decodedToken = decodeJWT(bearerToken);
       if (decodedToken) {
         console.log("Email de l'expéditeur:", decodedToken.email);
@@ -206,10 +205,8 @@ export default function SelectRecipient() {
       if (responseData && responseData.success === true) {
         console.log("Snap envoyé avec succès!");
 
-        // Attendre un court instant pour que les données soient mises à jour
         await new Promise((resolve) => setTimeout(resolve, 1000));
 
-        // Récupérer les snaps
         const snapResponse = await fetch(`${API_URL_SNAP}`, {
           method: "GET",
           headers: {
@@ -227,7 +224,6 @@ export default function SelectRecipient() {
           console.log("ID du dernier snap:", lastSnap._id);
           console.log("Détails du dernier snap:", lastSnap);
 
-          // Récupérer les détails spécifiques du snap
           const snapDetailsResponse = await fetch(
             `${API_URL_SNAP}/${lastSnap._id}`,
             {

@@ -30,7 +30,7 @@ export default function App() {
       }
     };
     checkAuth();
-  }, []);
+  }, [router]);
 
   if (!permission || !permission.granted) {
     return (

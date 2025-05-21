@@ -1,7 +1,17 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
-import { Button, Text, TextInput, View } from "react-native";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import {
+  ActivityIndicator,
+  Animated,
+  Button,
+  Easing,
+  Switch,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
+import styles from "./login.styles";
 
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 const apiKey = process.env.EXPO_PUBLIC_API_KEY;
@@ -10,93 +20,147 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  const spinValue = useRef(new Animated.Value(0)).current;
 
-  const handleLogin = async () => {
-    setError("");
-    try {
-      const response = await fetch(apiUrl || "", {
-        method: "PUT",
-        headers: {
-          "x-api-key": apiKey || "",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
-      if (!response.ok) {
-        throw new Error("Identifiants invalides");
-      }
-      const data = await response.json();
-
-      // Stocker les informations de l'utilisateur
-      await AsyncStorage.setItem("userToken", data.data.token);
-      await AsyncStorage.setItem("userEmail", email);
-      await AsyncStorage.setItem("userData", JSON.stringify(data.data));
-
-      router.push("../acceuil");
-    } catch (error: any) {
-      setError(error.message);
+  useEffect(() => {
+    if (isLoading) {
+      Animated.loop(
+        Animated.timing(spinValue, {
+          toValue: 1,
+          duration: 2000,
+          easing: Easing.linear,
+          useNativeDriver: true,
+        })
+      ).start();
     }
-  };
+  }, [isLoading, spinValue]);
+
+  const spin = spinValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["0deg", "360deg"],
+  });
+
+  const handleLogin = useCallback(
+    async (emailToUse = email, passwordToUse = password) => {
+      setError("");
+      try {
+        const response = await fetch(apiUrl || "", {
+          method: "PUT",
+          headers: {
+            "x-api-key": apiKey || "",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email: emailToUse, password: passwordToUse }),
+        });
+        if (!response.ok) {
+          throw new Error("Identifiants invalides");
+        }
+        const data = await response.json();
+
+        await AsyncStorage.setItem("userToken", data.data.token);
+        await AsyncStorage.setItem("userEmail", emailToUse);
+        await AsyncStorage.setItem("userData", JSON.stringify(data.data));
+
+        if (rememberMe) {
+          await AsyncStorage.setItem("savedEmail", emailToUse);
+          await AsyncStorage.setItem("savedPassword", passwordToUse);
+          await AsyncStorage.setItem("rememberMe", "true");
+        } else {
+          await AsyncStorage.removeItem("savedEmail");
+          await AsyncStorage.removeItem("savedPassword");
+          await AsyncStorage.removeItem("rememberMe");
+        }
+
+        router.replace("../acceuil");
+      } catch (error: any) {
+        setError(error.message);
+      }
+    },
+    [email, password, rememberMe, router]
+  );
+
+  const checkAutoLogin = useCallback(async () => {
+    try {
+      const savedEmail = await AsyncStorage.getItem("savedEmail");
+      const savedPassword = await AsyncStorage.getItem("savedPassword");
+      const rememberMeValue = await AsyncStorage.getItem("rememberMe");
+      const userToken = await AsyncStorage.getItem("userToken");
+
+      if (userToken) {
+        router.replace("../acceuil");
+        return;
+      }
+
+      if (rememberMeValue === "true" && savedEmail && savedPassword) {
+        setEmail(savedEmail);
+        setPassword(savedPassword);
+        setRememberMe(true);
+        await handleLogin(savedEmail, savedPassword);
+      }
+    } catch (error) {
+      console.error(
+        "Erreur lors de la vérification de la connexion automatique:",
+        error
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  }, [handleLogin, router]);
+
+  useEffect(() => {
+    checkAutoLogin();
+  }, [checkAutoLogin]);
+
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Animated.View
+          style={[styles.loadingSpinner, { transform: [{ rotate: spin }] }]}
+        >
+          <ActivityIndicator size="large" color="#FD3E83" />
+        </Animated.View>
+        <Text style={styles.loadingText}>Chargement...</Text>
+      </View>
+    );
+  }
 
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        padding: 24,
-        backgroundColor: "#fff",
-      }}
-    >
-      <Text
-        style={{
-          fontSize: 28,
-          fontWeight: "bold",
-          marginBottom: 24,
-          textAlign: "center",
-          color: "#333",
-        }}
-      >
-        Connexion
-      </Text>
+    <View style={styles.container}>
+      <Text style={styles.title}>Connexion</Text>
       <TextInput
         placeholder="Email"
         value={email}
         onChangeText={setEmail}
         autoCapitalize="none"
-        style={{
-          borderWidth: 1,
-          borderColor: "#ccc",
-          borderRadius: 8,
-          padding: 12,
-          marginBottom: 16,
-          fontSize: 16,
-          backgroundColor: "#f9f9f9",
-        }}
+        style={styles.input}
       />
       <TextInput
         placeholder="Mot de passe"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
-        style={{
-          borderWidth: 1,
-          borderColor: "#ccc",
-          borderRadius: 8,
-          padding: 12,
-          marginBottom: 16,
-          fontSize: 16,
-          backgroundColor: "#f9f9f9",
-        }}
+        style={styles.input}
       />
-      <View style={{ borderRadius: 8, overflow: "hidden", marginBottom: 16 }}>
-        <Button title="Se connecter" onPress={handleLogin} color="blue" />
+      <View style={styles.rememberMeContainer}>
+        <Switch
+          value={rememberMe}
+          onValueChange={setRememberMe}
+          trackColor={{ false: "#767577", true: "#81b0ff" }}
+          thumbColor={rememberMe ? "#2196F3" : "#f4f3f4"}
+        />
+        <Text style={styles.rememberMeText}>Se souvenir de moi</Text>
       </View>
-      {error ? (
-        <Text style={{ color: "red", textAlign: "center", marginTop: 8 }}>
-          {error}
-        </Text>
-      ) : null}
+      <View style={styles.buttonContainer}>
+        <Button
+          title="Se connecter"
+          onPress={() => handleLogin()}
+          color="#2196F3"
+        />
+      </View>
+      {error ? <Text style={styles.errorText}>{error}</Text> : null}
     </View>
   );
 }
