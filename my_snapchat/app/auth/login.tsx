@@ -26,6 +26,18 @@ export default function Login() {
   const spinValue = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
+    const checkAuth = async () => {
+      const token = await AsyncStorage.getItem("userToken");
+      if (token) {
+        router.replace("../acceuil");
+        return;
+      }
+      setIsLoading(false);
+    };
+    checkAuth();
+  }, [router]);
+
+  useEffect(() => {
     if (isLoading) {
       Animated.loop(
         Animated.timing(spinValue, {
