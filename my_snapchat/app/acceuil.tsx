@@ -34,7 +34,7 @@ export default function App() {
       try {
         const token = await AsyncStorage.getItem("userToken");
         if (!token) {
-          router.replace("/auth/login");
+          router.replace("/");
         }
       } catch (error) {
         console.error(
