@@ -107,7 +107,7 @@ export default function App() {
         "savedPassword",
         "rememberMe",
       ]);
-      router.replace("/auth/login");
+      router.replace("/");
     } catch (error) {
       console.error("Erreur lors de la déconnexion:", error);
     }

@@ -56,7 +56,7 @@ export default function Profile() {
         const token = await AsyncStorage.getItem("userToken");
         console.log("Token récupéré:", token ? "Présent" : "Absent");
         if (!token) {
-          router.replace("/auth/login");
+          router.replace("/");
           return;
         }
         setBearerToken(token);
@@ -94,8 +94,10 @@ export default function Profile() {
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         aspect: [1, 1],
-        quality: 1,
+        quality: 0.1,
         base64: true,
+        allowsMultipleSelection: false,
+        exif: false,
       });
 
       console.log("Résultat de la sélection:", result);
@@ -103,15 +105,31 @@ export default function Profile() {
       if (!result.canceled && result.assets && result.assets.length > 0) {
         console.log("Image sélectionnée:", result.assets[0].uri);
         if (result.assets[0].base64) {
-          setProfilePicture(
-            `data:image/jpeg;base64,${result.assets[0].base64}`
-          );
+          const base64Data = result.assets[0].base64;
+          const maxSize = 100000;
+
+          if (base64Data.length > maxSize) {
+            Alert.alert(
+              "Attention",
+              "L'image est trop grande. Veuillez en sélectionner une plus petite."
+            );
+            return;
+          }
+
+          setProfilePicture(`data:image/jpeg;base64,${base64Data}`);
         } else {
           const response = await fetch(result.assets[0].uri);
           const blob = await response.blob();
           const reader = new FileReader();
           reader.onload = () => {
             const base64data = reader.result as string;
+            if (base64data.length > 100000) {
+              Alert.alert(
+                "Attention",
+                "L'image est trop grande. Veuillez en sélectionner une plus petite."
+              );
+              return;
+            }
             setProfilePicture(base64data);
           };
           reader.readAsDataURL(blob);
@@ -119,6 +137,10 @@ export default function Profile() {
       }
     } catch (error) {
       console.error("Erreur lors de la sélection de l'image:", error);
+      Alert.alert(
+        "Erreur",
+        "Une erreur est survenue lors de la sélection de l'image"
+      );
     }
   };
 
@@ -144,6 +166,14 @@ export default function Profile() {
       const apiUrl = getApiUrl();
       console.log("URL de l'API:", `${apiUrl}`);
 
+      if (profilePicture && profilePicture.length > 100000) {
+        Alert.alert(
+          "Erreur",
+          "L'image de profil est trop grande. Veuillez en sélectionner une plus petite."
+        );
+        return;
+      }
+
       const finalProfilePicture =
         profilePicture ||
         "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
@@ -153,6 +183,7 @@ export default function Profile() {
         username: username || undefined,
         hasPassword: !!password,
         hasProfilePicture: !!finalProfilePicture,
+        profilePictureSize: finalProfilePicture.length,
       });
 
       setLoading(true);
@@ -207,7 +238,7 @@ export default function Profile() {
           [
             {
               text: "OK",
-              onPress: () => router.replace("/auth/login"),
+              onPress: () => router.replace("/"),
             },
           ]
         );

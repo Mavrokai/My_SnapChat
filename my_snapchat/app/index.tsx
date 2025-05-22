@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Camera } from "expo-camera";
 import * as MediaLibrary from "expo-media-library";
-import { useRouter } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -78,6 +78,7 @@ export default function Index() {
 
   return (
     <>
+      <Stack.Screen options={{ gestureEnabled: false }} />
       <ImageBackground
         source={require("../assets/images/logos.png")}
         style={styles.background}
