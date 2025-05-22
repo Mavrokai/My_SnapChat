@@ -217,7 +217,7 @@ export default function Profile() {
       try {
         data = JSON.parse(responseText);
       } catch (error) {
-        console.error("Erreur de parsing de la réponse:", responseText);
+        console.error("Erreur de parsing de la réponse:", responseText, error);
         throw new Error("Réponse invalide du serveur");
       }
 
