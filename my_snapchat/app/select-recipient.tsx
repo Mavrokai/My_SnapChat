@@ -281,7 +281,18 @@ export default function SelectRecipient() {
               style={styles.contactItem}
               onPress={() => handleSend(item._id)}
             >
-              <Text style={styles.avatar}>{item.profilePicture}</Text>
+              {item.profilePicture ? (
+                <Image
+                  source={{ uri: item.profilePicture }}
+                  style={styles.avatar}
+                />
+              ) : (
+                <View style={styles.avatarPlaceholder}>
+                  <Text style={styles.avatarText}>
+                    {item.username.charAt(0).toUpperCase()}
+                  </Text>
+                </View>
+              )}
               <Text style={styles.contactName}>{item.username}</Text>
             </TouchableOpacity>
           )}
@@ -328,8 +339,24 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   avatar: {
-    fontSize: 30,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     marginRight: 15,
+  },
+  avatarPlaceholder: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#FD3E83",
+    marginRight: 15,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  avatarText: {
+    color: "#fff",
+    fontSize: 20,
+    fontWeight: "bold",
   },
   contactName: {
     color: "#fff",

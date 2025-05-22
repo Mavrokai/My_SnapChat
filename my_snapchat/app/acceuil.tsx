@@ -2,10 +2,13 @@ import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Slider from "@react-native-community/slider";
 import { CameraType, CameraView, useCameraPermissions } from "expo-camera";
+import * as FileSystem from "expo-file-system";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
+  ActivityIndicator,
+  Alert,
   AppState,
   Image,
   Pressable,
@@ -18,6 +21,7 @@ import styles from "./acceuil.styles";
 
 export default function App() {
   const router = useRouter();
+  const [isReady, setIsReady] = useState(false);
   const [facing, setFacing] = useState<CameraType>("back");
   const [permission] = useCameraPermissions();
   const cameraRef = useRef<CameraView>(null);
@@ -27,9 +31,18 @@ export default function App() {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const token = await AsyncStorage.getItem("userToken");
-      if (!token) {
-        router.replace("/auth/login");
+      try {
+        const token = await AsyncStorage.getItem("userToken");
+        if (!token) {
+          router.replace("/auth/login");
+        }
+      } catch (error) {
+        console.error(
+          "Erreur lors de la vérification de l'authentification:",
+          error
+        );
+      } finally {
+        setIsReady(true);
       }
     };
     checkAuth();
@@ -59,22 +72,71 @@ export default function App() {
     };
   }, [router]);
 
-  if (!permission || !permission.granted) {
+  if (!isReady) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.message}>Permission caméra refusée</Text>
+      <View
+        style={[
+          styles.container,
+          { justifyContent: "center", alignItems: "center" },
+        ]}
+      >
+        <ActivityIndicator size="large" color="#FD3E83" />
+        <Text
+          style={{
+            color: "#FD3E83",
+            marginTop: 20,
+            fontSize: 18,
+            fontWeight: "600",
+          }}
+        >
+          Chargement...
+        </Text>
       </View>
     );
   }
 
+  if (!permission || !permission.granted) {
+    router.replace("/");
+    return null;
+  }
+
   const takePicture = async () => {
     if (cameraRef.current && "takePictureAsync" in cameraRef.current) {
-      const photo = await cameraRef.current.takePictureAsync();
-      console.log({ photo });
-      router.push({
-        pathname: "/select-recipient",
-        params: { imageUri: photo.uri },
-      });
+      try {
+        const photo = await cameraRef.current.takePictureAsync({
+          quality: 0.8,
+          skipProcessing: true,
+          exif: false,
+        });
+
+        if (!photo.uri) {
+          throw new Error("URI de l'image non disponible");
+        }
+
+        const fileInfo = await FileSystem.getInfoAsync(photo.uri);
+        if (!fileInfo.exists) {
+          throw new Error("Fichier image non trouvé");
+        }
+
+        const newUri = FileSystem.documentDirectory + "temp_photo.jpg";
+
+        // Copier l'image vers le nouveau chemin
+        await FileSystem.copyAsync({
+          from: photo.uri,
+          to: newUri,
+        });
+
+        router.push({
+          pathname: "/select-recipient",
+          params: { imageUri: newUri },
+        });
+      } catch (error) {
+        console.error("Erreur lors de la prise de photo:", error);
+        Alert.alert(
+          "Erreur",
+          "Impossible de prendre la photo. Veuillez réessayer."
+        );
+      }
     }
   };
 
