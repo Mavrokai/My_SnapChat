@@ -22,7 +22,7 @@ export default function Index() {
       try {
         const token = await AsyncStorage.getItem("userToken");
         if (token) {
-          router.replace("/acceuil");
+          router.replace("/");
           return;
         }
       } catch (error) {
