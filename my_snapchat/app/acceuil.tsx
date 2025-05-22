@@ -39,7 +39,7 @@ export default function App() {
     const subscription = AppState.addEventListener(
       "change",
       async (nextAppState) => {
-        if (nextAppState === "background" || nextAppState === "inactive") {
+        if (nextAppState === "background") {
           const rememberMe = await AsyncStorage.getItem("rememberMe");
           if (rememberMe !== "true") {
             await AsyncStorage.multiRemove([
