@@ -18,6 +18,7 @@ import {
   View,
 } from "react-native";
 import styles from "./acceuil.styles";
+import * as ImageManipulator from "expo-image-manipulator";
 
 export default function App() {
   const router = useRouter();
@@ -71,7 +72,12 @@ export default function App() {
       subscription.remove();
     };
   }, [router]);
-
+  useEffect(() => {
+    if (isReady && (!permission || !permission.granted)) {
+      router.replace("/");
+    }
+  }, [isReady, permission, router]);
+  
   if (!isReady) {
     return (
       <View
@@ -94,12 +100,6 @@ export default function App() {
       </View>
     );
   }
-
-  if (!permission || !permission.granted) {
-    router.replace("/");
-    return null;
-  }
-
   const takePicture = async () => {
     if (cameraRef.current && "takePictureAsync" in cameraRef.current) {
       try {
@@ -143,8 +143,9 @@ export default function App() {
   function toggleCameraFacing() {
     setFacing((current) => (current === "back" ? "front" : "back"));
   }
-
+  
   const openGallery = async () => {
+    await AsyncStorage.setItem("rememberMe", "true");
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
       allowsEditing: false,

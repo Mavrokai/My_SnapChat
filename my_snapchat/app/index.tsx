@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Camera } from "expo-camera";
-import * as MediaLibrary from "expo-media-library";
+import * as ImagePicker from "expo-image-picker";
 import { Stack, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -23,12 +23,12 @@ export default function Index() {
         const { status: cameraStatus } =
           await Camera.requestCameraPermissionsAsync();
         const { status: mediaStatus } =
-          await MediaLibrary.requestPermissionsAsync();
+          await ImagePicker.requestMediaLibraryPermissionsAsync();
 
         // Vérifier l'authentification
         const token = await AsyncStorage.getItem("userToken");
         if (token && cameraStatus === "granted" && mediaStatus === "granted") {
-          router.replace("/acceuil");
+          router.replace("/");
         }
       } catch (error) {
         console.error("Erreur lors de l'initialisation:", error);

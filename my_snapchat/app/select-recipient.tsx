@@ -64,6 +64,7 @@ export default function SelectRecipient() {
   const getStoredToken = async () => {
     try {
       const token = await AsyncStorage.getItem("userToken");
+      console.log("Token récupéré:", token);
       if (!token) {
         throw new Error("Non authentifié");
       }
