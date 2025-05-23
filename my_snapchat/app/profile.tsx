@@ -289,7 +289,45 @@ export default function Profile() {
       setLoading(false);
     }
   };
-
+  //Pour supprimer son compte
+  const handleDeleteAccount = async () => {
+    if (!bearerToken) {
+      Alert.alert("Erreur", "Non authentifié");
+      return;
+    }
+    Alert.alert(
+      "Confirmation",
+      "Supprimer votre compte ? Cette action est irréversible.",
+      [
+        { text: "Annuler", style: "cancel" },
+        {
+          text: "Supprimer",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const apiUrl = getApiUrl();
+              const response = await fetch(`${apiUrl}`, {
+                method: "DELETE",
+                headers: {
+                  "x-api-key": API_KEY || "",
+                  Authorization: `Bearer ${bearerToken}`,
+                  "Content-Type": "application/json",
+                },
+              });
+              if (response.ok) {
+                await AsyncStorage.clear();
+                router.replace("/");
+              } else {
+                Alert.alert("Erreur", "Impossible de supprimer le compte.");
+              }
+            } catch {
+              Alert.alert("Erreur", "Une erreur est survenue.");
+            }
+          },
+        },
+      ]
+    );
+  };  
   if (loading) {
     return (
       <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
@@ -300,7 +338,6 @@ export default function Profile() {
       </SafeAreaView>
     );
   }
-
   return (
     <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
       <View style={styles.content}>
@@ -360,6 +397,17 @@ export default function Profile() {
             onPress={handleUpdateProfile}
           >
             <Text style={styles.updateButtonText}>Mettre à jour</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.updateButton,
+              { backgroundColor: "#ff4444", marginTop: 10 },
+            ]}
+            onPress={handleDeleteAccount}
+          >
+            <Text style={[styles.updateButtonText, { color: "#fff" }]}>
+              Supprimer mon compte
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
