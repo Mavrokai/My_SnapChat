@@ -1,6 +1,6 @@
 # My Snapchat
 
-Une application mobile de messagerie éphémère inspirée de Snapchat, développée avec React Native et Expo.
+Une application mobile d'envoi de photo éphémère inspirée de Snapchat, développée avec React Native et Expo.
 
 ## 🚀 Fonctionnalités
 
