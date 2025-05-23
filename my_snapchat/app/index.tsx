@@ -1,11 +1,10 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Camera } from "expo-camera";
-import * as MediaLibrary from "expo-media-library";
+import * as ImagePicker from "expo-image-picker";
 import { Stack, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   ImageBackground,
   Text,
   TouchableOpacity,
@@ -18,24 +17,30 @@ export default function Index() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const checkAuth = async () => {
+    const initialize = async () => {
       try {
+        await Camera.requestCameraPermissionsAsync();
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+
         const token = await AsyncStorage.getItem("userToken");
-        if (token) {
-          router.replace("/");
-          return;
+        const rememberMe = await AsyncStorage.getItem("rememberMe");
+
+        if (token && rememberMe === "true") {
+          router.replace("/acceuil");
         }
       } catch (error) {
-        console.error(
-          "Erreur lors de la vérification de l'authentification:",
-          error
-        );
+        console.error("Erreur lors de l'initialisation:", error);
       } finally {
         setIsLoading(false);
       }
     };
-    checkAuth();
+
+    initialize();
   }, [router]);
+
+  const handleRegister = async () => {
+    router.push("/auth/register");
+  };
 
   if (isLoading) {
     return (
@@ -59,22 +64,6 @@ export default function Index() {
       </View>
     );
   }
-
-  const handleRegister = async () => {
-    const { status: cameraStatus } =
-      await Camera.requestCameraPermissionsAsync();
-    const { status: mediaStatus } =
-      await MediaLibrary.requestPermissionsAsync();
-
-    if (cameraStatus !== "granted" || mediaStatus !== "granted") {
-      Alert.alert(
-        "Permission requise",
-        "L'application a besoin d'accéder à la caméra et à la galerie pour fonctionner correctement."
-      );
-    } else {
-      router.push("/auth/register");
-    }
-  };
 
   return (
     <>

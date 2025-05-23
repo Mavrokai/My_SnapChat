@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as ImageManipulator from "expo-image-manipulator";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
@@ -22,7 +23,7 @@ const getApiUrl = () => {
   return baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
 };
 
-const decodeJWT = (token: string) => {
+export const decodeJWT = (token: string) => {
   try {
     const base64Url = token.split(".")[1];
     const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
@@ -38,6 +39,24 @@ const decodeJWT = (token: string) => {
   } catch (error) {
     console.error("Erreur lors du décodage du JWT:", error);
     return null;
+  }
+};
+
+const resizeImage = async (uri: string): Promise<string> => {
+  try {
+    const manipResult = await ImageManipulator.manipulateAsync(
+      uri,
+      [{ resize: { width: 800 } }],
+      { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG, base64: true }
+    );
+
+    if (manipResult.base64) {
+      return `data:image/jpeg;base64,${manipResult.base64}`;
+    }
+    return uri;
+  } catch (error) {
+    console.error("Erreur lors du redimensionnement de l'image:", error);
+    return uri;
   }
 };
 
@@ -104,33 +123,30 @@ export default function Profile() {
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
         console.log("Image sélectionnée:", result.assets[0].uri);
+        const maxSize = 100000;
+
         if (result.assets[0].base64) {
           const base64Data = result.assets[0].base64;
-          const maxSize = 100000;
-
           if (base64Data.length > maxSize) {
-            Alert.alert(
-              "Attention",
-              "L'image est trop grande. Veuillez en sélectionner une plus petite."
-            );
-            return;
+            console.log("Image trop grande, redimensionnement en cours...");
+            const resizedImage = await resizeImage(result.assets[0].uri);
+            setProfilePicture(resizedImage);
+          } else {
+            setProfilePicture(`data:image/jpeg;base64,${base64Data}`);
           }
-
-          setProfilePicture(`data:image/jpeg;base64,${base64Data}`);
         } else {
           const response = await fetch(result.assets[0].uri);
           const blob = await response.blob();
           const reader = new FileReader();
-          reader.onload = () => {
+          reader.onload = async () => {
             const base64data = reader.result as string;
-            if (base64data.length > 100000) {
-              Alert.alert(
-                "Attention",
-                "L'image est trop grande. Veuillez en sélectionner une plus petite."
-              );
-              return;
+            if (base64data.length > maxSize) {
+              console.log("Image trop grande, redimensionnement en cours...");
+              const resizedImage = await resizeImage(result.assets[0].uri);
+              setProfilePicture(resizedImage);
+            } else {
+              setProfilePicture(base64data);
             }
-            setProfilePicture(base64data);
           };
           reader.readAsDataURL(blob);
         }
@@ -165,14 +181,6 @@ export default function Profile() {
 
       const apiUrl = getApiUrl();
       console.log("URL de l'API:", `${apiUrl}`);
-
-      if (profilePicture && profilePicture.length > 100000) {
-        Alert.alert(
-          "Erreur",
-          "L'image de profil est trop grande. Veuillez en sélectionner une plus petite."
-        );
-        return;
-      }
 
       const finalProfilePicture =
         profilePicture ||
@@ -209,7 +217,7 @@ export default function Profile() {
       try {
         data = JSON.parse(responseText);
       } catch (error) {
-        console.error("Erreur de parsing de la réponse:", responseText);
+        console.error("Erreur de parsing de la réponse:", responseText, error);
         throw new Error("Réponse invalide du serveur");
       }
 
