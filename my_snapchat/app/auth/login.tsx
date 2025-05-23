@@ -40,6 +40,10 @@ export default function Login() {
             "userEmail",
             "userUsername",
             "userData",
+            "userProfilePicture",
+            "savedEmail",
+            "savedPassword",
+            "rememberMe",
           ]);
         }
       } catch (error) {
@@ -93,6 +97,20 @@ export default function Login() {
         await AsyncStorage.setItem("userEmail", emailToUse);
         await AsyncStorage.setItem("userUsername", data.data.username || "");
         await AsyncStorage.setItem("userData", JSON.stringify(data.data));
+
+        if (data.data.profilePicture) {
+          await AsyncStorage.setItem(
+            "userProfilePicture",
+            data.data.profilePicture
+          );
+        } else {
+          const defaultProfilePicture =
+            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
+          await AsyncStorage.setItem(
+            "userProfilePicture",
+            defaultProfilePicture
+          );
+        }
 
         if (rememberMe) {
           await AsyncStorage.setItem("savedEmail", emailToUse);
