@@ -7,13 +7,13 @@ import {
   ActivityIndicator,
   Alert,
   Image,
-  SafeAreaView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 const API_KEY = process.env.EXPO_PUBLIC_API_KEY;
@@ -292,72 +292,76 @@ export default function Profile() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
-        <ActivityIndicator size="large" color="#FD3E83" />
-        <Text style={styles.loadingText}>Chargement...</Text>
+      <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#FD3E83" />
+          <Text style={styles.loadingText}>Chargement...</Text>
+        </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Text style={styles.backButton}>← Retour</Text>
-        </TouchableOpacity>
-        <Text style={styles.title}>Mon Profil</Text>
-      </View>
+    <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
+      <View style={styles.content}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <Text style={styles.backButton}>← Retour</Text>
+          </TouchableOpacity>
+          <Text style={styles.title}>Mon Profil</Text>
+        </View>
 
-      <View style={styles.profileSection}>
-        <TouchableOpacity
-          onPress={handleImagePick}
-          style={styles.profileImageContainer}
-        >
-          {profilePicture ? (
-            <Image
-              source={{ uri: profilePicture }}
-              style={styles.profileImage}
-            />
-          ) : (
-            <View style={styles.profileImagePlaceholder}>
-              <Text style={styles.profileImageText}>+</Text>
-            </View>
-          )}
-        </TouchableOpacity>
-        <Text style={styles.changePhotoText}>Changer la photo</Text>
-      </View>
+        <View style={styles.profileSection}>
+          <TouchableOpacity
+            onPress={handleImagePick}
+            style={styles.profileImageContainer}
+          >
+            {profilePicture ? (
+              <Image
+                source={{ uri: profilePicture }}
+                style={styles.profileImage}
+              />
+            ) : (
+              <View style={styles.profileImagePlaceholder}>
+                <Text style={styles.profileImageText}>+</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+          <Text style={styles.changePhotoText}>Changer la photo</Text>
+        </View>
 
-      <View style={styles.form}>
-        <TextInput
-          style={styles.input}
-          placeholder="Nom d'utilisateur (laisser vide pour ne pas modifier)"
-          value={username}
-          onChangeText={setUsername}
-          placeholderTextColor="rgba(255,255,255,0.5)"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Email (laisser vide pour ne pas modifier)"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          placeholderTextColor="rgba(255,255,255,0.5)"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Nouveau mot de passe (laisser vide pour ne pas modifier)"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          placeholderTextColor="rgba(255,255,255,0.5)"
-        />
+        <View style={styles.form}>
+          <TextInput
+            style={styles.input}
+            placeholder="Nom d'utilisateur (laisser vide pour ne pas modifier)"
+            value={username}
+            onChangeText={setUsername}
+            placeholderTextColor="rgba(255,255,255,0.5)"
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Email (laisser vide pour ne pas modifier)"
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            placeholderTextColor="rgba(255,255,255,0.5)"
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Nouveau mot de passe (laisser vide pour ne pas modifier)"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            placeholderTextColor="rgba(255,255,255,0.5)"
+          />
 
-        <TouchableOpacity
-          style={styles.updateButton}
-          onPress={handleUpdateProfile}
-        >
-          <Text style={styles.updateButtonText}>Mettre à jour</Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.updateButton}
+            onPress={handleUpdateProfile}
+          >
+            <Text style={styles.updateButtonText}>Mettre à jour</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -367,6 +371,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#000",
+  },
+  content: {
+    flex: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
   header: {
     flexDirection: "row",
