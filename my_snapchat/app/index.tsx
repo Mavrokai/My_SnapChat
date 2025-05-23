@@ -19,16 +19,13 @@ export default function Index() {
   useEffect(() => {
     const initialize = async () => {
       try {
-        // Demander les permissions dans tous les cas
-        const { status: cameraStatus } =
-          await Camera.requestCameraPermissionsAsync();
-        const { status: mediaStatus } =
-          await ImagePicker.requestMediaLibraryPermissionsAsync();
+        await Camera.requestCameraPermissionsAsync();
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-        // Vérifier l'authentification
         const token = await AsyncStorage.getItem("userToken");
-        if (token && cameraStatus === "granted" && mediaStatus === "granted") {
-          router.replace("/");
+
+        if (token) {
+          router.replace("/acceuil");
         }
       } catch (error) {
         console.error("Erreur lors de l'initialisation:", error);
