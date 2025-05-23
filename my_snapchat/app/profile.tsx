@@ -44,15 +44,22 @@ export const decodeJWT = (token: string) => {
 
 const resizeImage = async (uri: string): Promise<string> => {
   try {
+    console.log("Début du redimensionnement de l'image");
     const manipResult = await ImageManipulator.manipulateAsync(
       uri,
-      [{ resize: { width: 800 } }],
-      { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG, base64: true }
+      [{ resize: { width: 800, height: 800 } }],
+      {
+        format: ImageManipulator.SaveFormat.JPEG,
+        base64: true,
+        compress: 0.9,
+      }
     );
 
     if (manipResult.base64) {
+      console.log("Image redimensionnée avec succès");
       return `data:image/jpeg;base64,${manipResult.base64}`;
     }
+    console.log("Retour de l'image originale car pas de base64");
     return uri;
   } catch (error) {
     console.error("Erreur lors du redimensionnement de l'image:", error);
@@ -93,8 +100,63 @@ export default function Profile() {
 
         setEmail(storedEmail || "");
         setUsername(storedUsername || "");
-        if (storedProfilePicture) {
-          setProfilePicture(storedProfilePicture);
+
+        try {
+          console.log(
+            "Tentative de récupération de la photo de profil depuis l'API"
+          );
+          const response = await fetch(`${getApiUrl()}`, {
+            method: "GET",
+            headers: {
+              "x-api-key": API_KEY || "",
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          });
+
+          console.log("Statut de la réponse API:", response.status);
+          const responseText = await response.text();
+          console.log("Réponse brute de l'API:", responseText);
+
+          if (response.ok) {
+            const data = JSON.parse(responseText);
+            console.log("Données de l'API:", {
+              hasData: !!data.data,
+              hasProfilePicture: !!(data.data && data.data.profilePicture),
+            });
+
+            if (data.data && data.data.profilePicture) {
+              console.log("Photo de profil trouvée dans l'API");
+              const profilePic = data.data.profilePicture;
+              setProfilePicture(profilePic);
+              await AsyncStorage.setItem("userProfilePicture", profilePic);
+            } else {
+              console.log("Aucune photo de profil trouvée dans l'API");
+              if (storedProfilePicture) {
+                console.log("Utilisation de la photo stockée localement");
+                setProfilePicture(storedProfilePicture);
+              }
+            }
+          } else {
+            console.log("Erreur API:", response.status);
+            if (storedProfilePicture) {
+              console.log(
+                "Utilisation de la photo stockée localement après erreur API"
+              );
+              setProfilePicture(storedProfilePicture);
+            }
+          }
+        } catch (apiError) {
+          console.error(
+            "Erreur lors de la récupération de la photo de profil:",
+            apiError
+          );
+          if (storedProfilePicture) {
+            console.log(
+              "Utilisation de la photo stockée localement après erreur"
+            );
+            setProfilePicture(storedProfilePicture);
+          }
         }
       } catch (error) {
         console.error("Erreur lors du chargement des données:", error);
@@ -113,7 +175,7 @@ export default function Profile() {
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         aspect: [1, 1],
-        quality: 0.1,
+        quality: 1,
         base64: true,
         allowsMultipleSelection: false,
         exif: false,
@@ -123,7 +185,7 @@ export default function Profile() {
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
         console.log("Image sélectionnée:", result.assets[0].uri);
-        const maxSize = 100000;
+        const maxSize = 500000;
 
         if (result.assets[0].base64) {
           const base64Data = result.assets[0].base64;
@@ -225,20 +287,22 @@ export default function Profile() {
 
       if (response.ok) {
         console.log("Mise à jour réussie, sauvegarde des données locales");
-        if (email) await AsyncStorage.setItem("userEmail", email);
-        if (username) await AsyncStorage.setItem("userUsername", username);
-        if (finalProfilePicture)
-          await AsyncStorage.setItem("userProfilePicture", finalProfilePicture);
 
         await AsyncStorage.multiRemove([
           "userToken",
           "userEmail",
           "userUsername",
           "userData",
+          "userProfilePicture",
           "savedEmail",
           "savedPassword",
           "rememberMe",
         ]);
+
+        if (email) await AsyncStorage.setItem("userEmail", email);
+        if (username) await AsyncStorage.setItem("userUsername", username);
+        if (finalProfilePicture)
+          await AsyncStorage.setItem("userProfilePicture", finalProfilePicture);
 
         Alert.alert(
           "Succès",
