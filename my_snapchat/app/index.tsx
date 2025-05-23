@@ -19,14 +19,13 @@ export default function Index() {
   useEffect(() => {
     const initialize = async () => {
       try {
-        await AsyncStorage.removeItem("userToken");
-
         await Camera.requestCameraPermissionsAsync();
         await ImagePicker.requestMediaLibraryPermissionsAsync();
 
         const token = await AsyncStorage.getItem("userToken");
+        const rememberMe = await AsyncStorage.getItem("rememberMe");
 
-        if (token) {
+        if (token && rememberMe === "true") {
           router.replace("/acceuil");
         }
       } catch (error) {
