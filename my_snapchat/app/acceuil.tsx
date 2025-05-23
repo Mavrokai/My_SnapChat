@@ -77,7 +77,7 @@ export default function App() {
       router.replace("/");
     }
   }, [isReady, permission, router]);
-  
+
   if (!isReady) {
     return (
       <View
@@ -143,7 +143,7 @@ export default function App() {
   function toggleCameraFacing() {
     setFacing((current) => (current === "back" ? "front" : "back"));
   }
-  
+
   const openGallery = async () => {
     await AsyncStorage.setItem("rememberMe", "true");
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -152,10 +152,20 @@ export default function App() {
       quality: 1,
     });
     if (!result.canceled && result.assets && result.assets.length > 0) {
-      router.push({
-        pathname: "/select-recipient",
-        params: { imageUri: result.assets[0].uri },
-      });
+      try {
+        const manipulatedImg = await ImageManipulator.manipulateAsync(
+          result.assets[0].uri,
+          [],
+          { compress: 0.9, format: ImageManipulator.SaveFormat.JPEG }
+        );
+        router.push({
+          pathname: "/select-recipient",
+          params: { imageUri: manipulatedImg.uri },
+        });
+      } catch (error) {
+        Alert.alert("Erreur", "Impossible de traiter l'image sélectionnée.");
+        console.error("Erreur lors de la manipulation de l'image:", error);
+      }
     }
   };
 
