@@ -19,6 +19,8 @@ export default function Index() {
   useEffect(() => {
     const initialize = async () => {
       try {
+        await AsyncStorage.removeItem("userToken");
+
         await Camera.requestCameraPermissionsAsync();
         await ImagePicker.requestMediaLibraryPermissionsAsync();
 
