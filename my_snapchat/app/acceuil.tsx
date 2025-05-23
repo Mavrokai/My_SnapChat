@@ -232,6 +232,12 @@ export default function App() {
           >
             <Text style={styles.menuText}>Profil</Text>
           </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => router.push("/reception")}
+          >
+            <Text style={styles.menuText}>Réception</Text>
+          </TouchableOpacity>
           <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
             <Text style={styles.menuText}>Déconnexion</Text>
           </TouchableOpacity>
